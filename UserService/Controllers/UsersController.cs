@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserService.Models;
-using UserService.Repositories;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
