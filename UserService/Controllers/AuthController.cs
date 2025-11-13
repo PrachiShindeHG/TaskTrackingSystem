@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UserService.Models;
-using UserService.Repositories; // This is IUserRepository
+using UserService.Models; // This is IUserRepository
 using System.Threading.Tasks;
 
 namespace UserService.Controllers

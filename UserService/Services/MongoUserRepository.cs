@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using Microsoft.Extensions.Options;
-using UserService.Settings;
 using UserService.Models; // For MongoSettings
 
 public class MongoUserRepository : IUserRepository
