@@ -1,0 +1,104 @@
+{
+  "info": {
+    "name": "Task Management Platform - LOCAL (Visual Studio)",
+    "description": "Works with your current local ports (7251, 7252, 7253 etc.)\nNO DOCKER NEEDED\nAuto-saves token + uses HTTPS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. UserService (LOCAL)",
+      "item": [
+        {
+          "name": "Create Admin User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\",\n  \"role\": \"Admin\"\n}" },
+            "url": { "raw": "{{user_service_url}}/api/users", "host": ["{{user_service_url}}"], "path": ["api", "users"] }
+          }
+        },
+        {
+          "name": "Login & Save Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const resp = pm.response.json();",
+                  "if (resp.token) {",
+                  "    pm.collectionVariables.set(\"auth_token\", resp.token);",
+                  "    console.log(\"Token saved:\", resp.token);",
+                  "} else {",
+                  "    console.log(\"Login failed:\", resp);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}" },
+            "url": { "raw": "{{user_service_url}}/api/auth/login", "host": ["{{user_service_url}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. TaskService (LOCAL)",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test from Postman\",\n  \"description\": \"Created via Postman local\",\n  \"priority\": \"High\",\n  \"status\": \"Open\",\n  \"assigneeId\": \"667f1f77bcf86cd799439011\",\n  \"dueDate\": \"2025-12-31T00:00:00Z\"\n}"
+            },
+            "url": { "raw": "{{task_service_url}}/api/tasks", "host": ["{{task_service_url}}"], "path": ["api", "tasks"] }
+          }
+        },
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": { "raw": "{{task_service_url}}/api/tasks", "host": ["{{task_service_url}}"], "path": ["api", "tasks"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. ReportingService (LOCAL)",
+      "item": [
+        {
+          "name": "Tasks By User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": { "raw": "{{reporting_service_url}}/api/reports/tasks-by-user", "host": ["{{reporting_service_url}}"], "path": ["api", "reports", "tasks-by-user"] }
+          }
+        },
+        {
+          "name": "SLA Breaches",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": { "raw": "{{reporting_service_url}}/api/reports/sla-breaches", "host": ["{{reporting_service_url}}"], "path": ["api", "reports", "sla-breaches"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "auth_token", "value": "", "type": "string" },
+    { "key": "user_service_url", "value": "https://localhost:7251", "type": "string" },
+    { "key": "task_service_url", "value": "https://localhost:7092", "type": "string" },
+    { "key": "reporting_service_url", "value": "https://localhost:7190", "type": "string" }
+  ]
+}

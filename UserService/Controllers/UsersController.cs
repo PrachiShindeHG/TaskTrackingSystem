@@ -88,17 +88,55 @@ public class UsersController : ControllerBase
         try
         {
             var existing = await _repository.GetByIdAsync(id);
-            if (existing == null) return NotFound();
-            // Role check: Assume token in header, parse role
-            var token = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-            if (string.IsNullOrEmpty(token) || !token.EndsWith("_Admin")) return Unauthorized("Admin role required");
+            if (existing == null)
+                return NotFound($"User with id {id} not found");
+
+            // === FIXED: Safe token extraction + Admin role check ===
+            if (!Request.Headers.TryGetValue("Authorization", out var authHeader))
+                return Unauthorized("Authorization header is missing");
+
+            var token = authHeader.ToString().Trim();
+            if (!token.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                return Unauthorized("Invalid token format");
+
+            token = token["Bearer ".Length..].Trim(); // Remove "Bearer "
+
+            if (!token.EndsWith("_Admin"))
+            {
+                _logger.LogWarning("Delete attempt by non-Admin. Token: {Token}", token);
+                return Forbid("Only Admin can delete users");
+            }
+            // === END FIX ===
+
             await _repository.DeleteAsync(id);
-            return NoContent();
+            _logger.LogInformation("User {UserId} deleted by Admin", id);
+            return NoContent(); // 204
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting user");
+            _logger.LogError(ex, "Error deleting user {UserId}", id);
             return StatusCode(500, "Internal server error");
         }
     }
+
+    //[HttpDelete("{id}")]
+    //public async Task<IActionResult> Delete(string id)
+    //{
+    //    try
+    //    {
+
+    //        var existing = await _repository.GetByIdAsync(id);
+    //        if (existing == null) return NotFound();
+    //        // Role check: Assume token in header, parse role
+    //        var token = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+    //        if (string.IsNullOrEmpty(token) || !token.EndsWith("_Admin")) return Unauthorized("Admin role required");
+    //        await _repository.DeleteAsync(id);
+    //        return NoContent();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error deleting user");
+    //        return StatusCode(500, "Internal server error");
+    //    }
+    //}
 }

@@ -3,10 +3,10 @@
     public class TasksByUserReport
     {
         public string UserId { get; set; } = string.Empty;
-        public string? Username { get; set; } // Optional: enrich later
         public int TotalTasks { get; set; }
         public int Open { get; set; }
         public int InProgress { get; set; }
+        public int Blocked { get; set; }
         public int Completed { get; set; }
     }
 

@@ -1,0 +1,54 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  userservice:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+    container_name: userservice
+    ports:
+      - "5001:80"
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__DatabaseName=TaskManagementDB
+
+  taskservice:
+    build:
+      context: .
+      dockerfile: TaskService/Dockerfile
+    container_name: taskservice
+    ports:
+      - "5002:80"
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__DatabaseName=TaskManagementDB
+
+  reportingservice:
+    build:
+      context: .
+      dockerfile: ReportingService/Dockerfile
+    container_name: reportingservice
+    ports:
+      - "5003:80"
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__DatabaseName=TaskManagementDB
+
+volumes:
+  mongo_data:
