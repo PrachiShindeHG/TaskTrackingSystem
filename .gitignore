@@ -1,0 +1,25 @@
+﻿# Visual Studio - THIS IS THE MOST IMPORTANT PART
+.vs/
+.vscode/
+bin/
+obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+[TestResults]/
+
+# Docker
+docker-compose.override.yml

@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{4D5E910D-22D3-4036-952F-275C394770DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService", "TaskService\TaskService.csproj", "{710D1740-7D51-499A-AE54-40BFA6F46225}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportingService", "ReportingService\ReportingService.csproj", "{C6CDFB84-06C8-4C9E-A0D3-28460CD9DFFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Tests", "UserService.Tests\UserService.Tests.csproj", "{9EF3EE20-7C0C-441F-AC7F-DD1F39AF94C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D5E910D-22D3-4036-952F-275C394770DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D5E910D-22D3-4036-952F-275C394770DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D5E910D-22D3-4036-952F-275C394770DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D5E910D-22D3-4036-952F-275C394770DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{710D1740-7D51-499A-AE54-40BFA6F46225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{710D1740-7D51-499A-AE54-40BFA6F46225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{710D1740-7D51-499A-AE54-40BFA6F46225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{710D1740-7D51-499A-AE54-40BFA6F46225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6CDFB84-06C8-4C9E-A0D3-28460CD9DFFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6CDFB84-06C8-4C9E-A0D3-28460CD9DFFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6CDFB84-06C8-4C9E-A0D3-28460CD9DFFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6CDFB84-06C8-4C9E-A0D3-28460CD9DFFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF3EE20-7C0C-441F-AC7F-DD1F39AF94C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF3EE20-7C0C-441F-AC7F-DD1F39AF94C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF3EE20-7C0C-441F-AC7F-DD1F39AF94C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF3EE20-7C0C-441F-AC7F-DD1F39AF94C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
