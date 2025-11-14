@@ -17,6 +17,11 @@ namespace UserService.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Login method
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>Returns authentication token</returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {

@@ -1,121 +1,149 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskService.Models;
 
-[ApiController]
-[Route("api/tasks")]
-public class TasksController : ControllerBase
+namespace TaskService.Controllers
 {
-    private readonly ITaskRepository _repo;
-    private readonly ILogger<TasksController> _logger;
-
-    public TasksController(ITaskRepository repo, ILogger<TasksController> logger)
+    [ApiController]
+    [Route("api/tasks")]
+    public class TasksController : ControllerBase
     {
-        _repo = repo;
-        _logger = logger;
-    }
+        private readonly ITaskRepository _repo;
+        private readonly ILogger<TasksController> _logger;
 
-    private string? GetUserIdFromToken()
-    {
-        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        return string.IsNullOrEmpty(token) ? null : token.Split('_')[0];
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Get(
-        [FromQuery] string? status,
-        [FromQuery] string? assigneeId,
-        [FromQuery] DateTime? from,
-        [FromQuery] DateTime? to)
-    {
-        var tasks = await _repo.FilterAsync(status, assigneeId, from, to);
-        return Ok(tasks);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
-    {
-        var task = await _repo.GetByIdAsync(id);
-        if (task == null) return NotFound();
-        return Ok(task);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] TaskItem task)
-    {
-        if (task == null) return BadRequest();
-        var created = await _repo.CreateAsync(task);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] TaskItem updatedTask)
-    {
-        var userId = GetUserIdFromToken();
-        if (userId == null) return Unauthorized("Token required");
-
-        var existing = await _repo.GetByIdAsync(id);
-        if (existing == null) return NotFound();
-
-        // Log status change
-        if (existing.Status != updatedTask.Status)
+        public TasksController(ITaskRepository repo, ILogger<TasksController> logger)
         {
-            existing.ActivityLogs.Add(new ActivityLog
-            {
-                ChangedBy = userId,
-                ChangeDescription = $"Status changed from {existing.Status} to {updatedTask.Status}"
-            });
+            _repo = repo;
+            _logger = logger;
         }
 
-        existing.Title = updatedTask.Title;
-        existing.Description = updatedTask.Description;
-        existing.Priority = updatedTask.Priority;
-        existing.Status = updatedTask.Status;
-        existing.AssigneeId = updatedTask.AssigneeId;
-        existing.DueDate = updatedTask.DueDate;
-        existing.UpdatedAt = DateTime.UtcNow;
+        private string? GetUserIdFromToken()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            return string.IsNullOrEmpty(token) ? null : token.Split('_')[0];
+        }
 
-        await _repo.UpdateAsync(id, existing);
-        return NoContent();
-    }
+        /// <summary>
+        /// Method to get task using filters
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="assigneeId"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns>Returns 200 OK</returns>
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] string? status, [FromQuery] string? assigneeId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            var tasks = await _repo.FilterAsync(status, assigneeId, from, to);
+            return Ok(tasks);
+        }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        try
+        /// <summary>
+        /// Method to get tasks by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Returns 200 OK</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var task = await _repo.GetByIdAsync(id);
+            if (task == null) return NotFound();
+            return Ok(task);
+        }
+
+        /// <summary>
+        /// Method to create task
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns>Returns 201 Created</returns>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] TaskItem task)
+        {
+            if (task == null) return BadRequest();
+            var created = await _repo.CreateAsync(task);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+
+        /// <summary>
+        /// Method to update tasks
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updatedTask"></param>
+        /// <returns>Returns 204</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] TaskItem updatedTask)
         {
             var userId = GetUserIdFromToken();
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Valid token is required");
+            if (userId == null) return Unauthorized("Token required");
 
-            var existingTask = await _repo.GetByIdAsync(id);
-            if (existingTask == null)
-                return NotFound($"Task with id {id} not found");
+            var existing = await _repo.GetByIdAsync(id);
+            if (existing == null) return NotFound();
 
-            // Optional: Only allow Admin or the assignee to delete
-            // Uncomment next line if you want role restriction
-            // var role = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Split('_')[1];
-            // if (role != "Admin" && existingTask.AssigneeId != userId)
-            //     return Forbid("You can only delete your own tasks or as Admin");
-
-            // Log deletion activity
-            existingTask.ActivityLogs.Add(new ActivityLog
+            // Log status change
+            if (existing.Status != updatedTask.Status)
             {
-                ChangedBy = userId,
-                ChangeDescription = "Task deleted"
-            });
+                existing.ActivityLogs.Add(new ActivityLog
+                {
+                    ChangedBy = userId,
+                    ChangeDescription = $"Status changed from {existing.Status} to {updatedTask.Status}"
+                });
+            }
 
-            // Save log before actual delete (optional — or just delete directly)
-            await _repo.UpdateAsync(id, existingTask);
+            existing.Title = updatedTask.Title;
+            existing.Description = updatedTask.Description;
+            existing.Priority = updatedTask.Priority;
+            existing.Status = updatedTask.Status;
+            existing.AssigneeId = updatedTask.AssigneeId;
+            existing.DueDate = updatedTask.DueDate;
+            existing.UpdatedAt = DateTime.UtcNow;
 
-            // Now delete the task
-            await _repo.DeleteAsync(id); // You need to add DeleteAsync in repository (see below)
-
-            return NoContent(); // 204 - successful deletion
+            await _repo.UpdateAsync(id, existing);
+            return NoContent();
         }
-        catch (Exception ex)
+
+        /// <summary>
+        /// Method to delete the task
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Returns 204</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
         {
-            _logger.LogError(ex, "Error deleting task {TaskId}", id);
-            return StatusCode(500, "Internal server error");
+            try
+            {
+                var userId = GetUserIdFromToken();
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized("Valid token is required");
+
+                var existingTask = await _repo.GetByIdAsync(id);
+                if (existingTask == null)
+                    return NotFound($"Task with id {id} not found");
+
+                var role = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Split('_')[1];
+                if (role != "Admin")
+                {
+                    return Forbid("Only Admin can delete the tasks");
+                }
+
+                // Log deletion activity
+                existingTask.ActivityLogs.Add(new ActivityLog
+                {
+                    ChangedBy = userId,
+                    ChangeDescription = "Task deleted"
+                });
+
+                // Save log before actual delete 
+                await _repo.UpdateAsync(id, existingTask);
+
+                // delete the task
+                await _repo.DeleteAsync(id); 
+
+                return NoContent(); // 204 - successful deletion
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting task {TaskId}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 }

@@ -2,7 +2,6 @@ services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
@@ -12,11 +11,13 @@ services:
     build:
       context: .
       dockerfile: UserService/Dockerfile
+    image: userservice:dev
     container_name: userservice
     ports:
       - "5001:80"
     depends_on:
       - mongodb
+    pull_policy: never
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017
@@ -26,11 +27,13 @@ services:
     build:
       context: .
       dockerfile: TaskService/Dockerfile
+    image: taskservice:dev
     container_name: taskservice
     ports:
       - "5002:80"
     depends_on:
       - mongodb
+    pull_policy: never
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017
@@ -40,11 +43,13 @@ services:
     build:
       context: .
       dockerfile: ReportingService/Dockerfile
+    image: reportingservice:dev
     container_name: reportingservice
     ports:
       - "5003:80"
     depends_on:
       - mongodb
+    pull_policy: never
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017

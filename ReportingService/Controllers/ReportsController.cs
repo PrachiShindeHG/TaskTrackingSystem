@@ -18,14 +18,20 @@ namespace ReportingService.Controllers
             _logger = logger;
         }
 
-        // Helper: Check token presence
+        /// <summary>
+        /// Check token presence
+        /// </summary>
+        /// <returns>Return token</returns>
         private IActionResult RequireAuth()
         {
             var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim();
             return string.IsNullOrEmpty(token) ? Unauthorized("Token required") : Ok();
         }
 
-        // 1. Tasks By User
+        /// <summary>
+        /// Tasks By User
+        /// </summary>
+        /// <returns>Returns users task</returns>
         [HttpGet("tasks-by-user")]
         public async Task<IActionResult> TasksByUser()
         {
@@ -50,7 +56,10 @@ namespace ReportingService.Controllers
             return Ok(report);
         }
 
-        // 2. Tasks By Status
+        /// <summary>
+        /// Tasks By Status
+        /// </summary>
+        /// <returns>Returns users task by status</returns>
         [HttpGet("tasks-by-status")]
         public async Task<IActionResult> TasksByStatus()
         {
@@ -70,7 +79,10 @@ namespace ReportingService.Controllers
             return Ok(report);
         }
 
-        // 3. SLA Breaches (Overdue Tasks)
+        /// <summary>
+        /// SLA Breaches (Overdue Tasks)
+        /// </summary>
+        /// <returns>Returns SLA report</returns>
         [HttpGet("sla-breaches")]
         public async Task<IActionResult> SLAReport()
         {

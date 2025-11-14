@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 public interface IUserRepository
 {
-    Task<List<User>> GetAllAsync();
-    Task<User> GetByIdAsync(string id);
-    Task<User> CreateAsync(User user);
-    Task UpdateAsync(string id, User user);
+    Task<List<User>> GetAllUserAsync();
+    Task<User> GetUserByIdAsync(string id);
+    Task<User> CreateUserAsync(User user);
+    Task UpdateUserAsync(string id, User user);
     Task DeleteAsync(string id);
     Task<User> AuthenticateAsync(string username, string password);
 }

@@ -38,6 +38,10 @@ namespace ReportingService.Tests.Controllers
             _controller.Request.Headers["Authorization"] = $"Bearer {token}";
         }
 
+        /// <summary>
+        /// Test method to get task of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task TasksByUser_MissingToken_ReturnsUnauthorized()
         {
@@ -48,6 +52,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual("Token required", unauthorized?.Value);
         }
 
+        /// <summary>
+        /// Test method to get task of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task TasksByUser_ValidToken_ReturnsReport()
         {
@@ -75,6 +83,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual(1, u1.Completed);
         }
 
+        /// <summary>
+        /// Test method to get task of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task TasksByUser_UnassignedUser_ShowsUnassigned()
         {
@@ -94,6 +106,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual("Unassigned", report[0].UserId);
         }
 
+        /// <summary>
+        /// Test method to get task of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task TasksByStatus_NoToken_ReturnsUnauthorized()
         {
@@ -102,6 +118,10 @@ namespace ReportingService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(UnauthorizedObjectResult));
         }
 
+        /// <summary>
+        /// Test method to get task of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task TasksByStatus_WithToken_GroupsByStatus()
         {
@@ -128,6 +148,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual(2, open.Count);
         }
 
+        /// <summary>
+        /// Test method to get SLA report of user
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task SLAReport_NoToken_ReturnsUnauthorized()
         {
@@ -136,6 +160,10 @@ namespace ReportingService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(UnauthorizedObjectResult));
         }
 
+        /// <summary>
+        /// Test method to create SLA report 
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task SLAReport_OnlyOverdueNonCompletedTasks()
         {
@@ -164,6 +192,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual(3, breach.DaysOverdue);
         }
 
+        /// <summary>
+        /// Test method to create SLA report 
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task SLAReport_OrdersByDaysOverdueDescending()
         {
@@ -190,6 +222,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual("T2", breaches[2].TaskId);
         }
 
+        /// <summary>
+        /// Test method to get SLA report 
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task SLAReport_UnassignedUser_ShowsUnassigned()
         {
@@ -208,6 +244,10 @@ namespace ReportingService.Tests.Controllers
             Assert.AreEqual("Unassigned", breaches[0].AssigneeId);
         }
 
+        /// <summary>
+        /// Test method to get user tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task RequireAuth_EmptyHeader_ReturnsUnauthorized()
         {

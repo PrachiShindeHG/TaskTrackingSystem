@@ -1,5 +1,4 @@
-﻿// ReportingService/Repositories/ITaskRepository.cs
-using TaskService.Models; // ← THIS IS CORRECT
+﻿using TaskService.Models; 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -6,6 +6,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TaskService.Controllers;
 using TaskService.Models;
 
 namespace TaskService.Tests.Controllers
@@ -34,6 +35,10 @@ namespace TaskService.Tests.Controllers
             _controller.Request.Headers["Authorization"] = $"Bearer {token}";
         }
 
+        /// <summary>
+        /// Test method to get tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Get_ReturnsFilteredTasks()
         {
@@ -47,6 +52,10 @@ namespace TaskService.Tests.Controllers
             Assert.AreEqual(tasks, okResult.Value);
         }
 
+        /// <summary>
+        /// Test method to get tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task GetById_Found_ReturnsOk()
         {
@@ -60,6 +69,10 @@ namespace TaskService.Tests.Controllers
             Assert.AreEqual(task, okResult.Value);
         }
 
+        /// <summary>
+        /// Test method to get tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task GetById_NotFound_ReturnsNotFound()
         {
@@ -70,6 +83,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        /// <summary>
+        /// Test method to create tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Create_NullTask_ReturnsBadRequest()
         {
@@ -78,6 +95,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(BadRequestResult));
         }
 
+        /// <summary>
+        /// Test method to create tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Create_ValidTask_ReturnsCreatedAtAction()
         {
@@ -93,6 +114,10 @@ namespace TaskService.Tests.Controllers
             Assert.AreEqual("1", createdResult.RouteValues["id"]);
         }
 
+        /// <summary>
+        /// Test method to update tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Update_NoToken_ReturnsUnauthorized()
         {
@@ -106,6 +131,10 @@ namespace TaskService.Tests.Controllers
             Assert.AreEqual("Token required", unauthorized.Value);
         }
 
+        /// <summary>
+        /// Test method to update tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Update_NotFound_ReturnsNotFound()
         {
@@ -118,6 +147,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
+        /// <summary>
+        /// Test method to update tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Update_StatusChanged_LogsActivity_ReturnsNoContent()
         {
@@ -151,6 +184,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
         }
 
+        /// <summary>
+        /// Test method to update tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Update_StatusUnchanged_NoActivityLog_ReturnsNoContent()
         {
@@ -182,6 +219,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
         }
 
+        /// <summary>
+        /// Test method to delete tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Delete_NoToken_ReturnsUnauthorized()
         {
@@ -193,6 +234,10 @@ namespace TaskService.Tests.Controllers
             Assert.AreEqual("Valid token is required", unauthorized.Value);
         }
 
+        /// <summary>
+        /// Test method to delete tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Delete_NotFound_ReturnsNotFound()
         {
@@ -206,6 +251,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsTrue(notFound.Value.ToString().Contains("Task with id 1 not found"));
         }
 
+        /// <summary>
+        /// Test method to delete tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Delete_Valid_LogsActivity_DeletesTask_ReturnsNoContent()
         {
@@ -231,6 +280,10 @@ namespace TaskService.Tests.Controllers
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
         }
 
+        /// <summary>
+        /// Test method to delete tasks
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task Delete_Exception_ReturnsInternalServerError()
         {

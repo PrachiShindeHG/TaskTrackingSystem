@@ -1,7 +1,6 @@
-﻿// ReportingService/Repositories/MongoTaskRepository.cs
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using Microsoft.Extensions.Options;
-using TaskService.Models; // ← CORRECT
+using TaskService.Models;
 
 namespace ReportingService.Repositories
 {
