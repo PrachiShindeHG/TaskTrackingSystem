@@ -1,20 +1,37 @@
-# OLD (PULLS FROM INTERNET)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# NEW — USE LOCAL IMAGE
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# === BASE RUNTIME (LOCAL ONLY) ===
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
+EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# === BUILD STAGE (LOCAL ONLY) ===
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# COPY PROJECT FILES (INCLUDING TaskService REFERENCE)
+COPY ["ReportingService/ReportingService.csproj", "ReportingService/"]
+COPY ["TaskService/TaskService.csproj", "TaskService/"]
+
+# RESTORE USING LOCAL SDK — NO INTERNET PULL
+RUN dotnet restore "./ReportingService/ReportingService.csproj"
+
+# COPY SOURCE CODE
 COPY . .
-RUN dotnet restore
-RUN dotnet build -c Release --no-restore
 
+# BUILD REPORTINGSERVICE
+WORKDIR "/src/ReportingService"
+RUN dotnet build "./ReportingService.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# === PUBLISH ===
 FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish --no-restore
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./ReportingService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# === FINAL ===
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

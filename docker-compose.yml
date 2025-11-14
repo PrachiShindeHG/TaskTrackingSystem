@@ -6,54 +6,82 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - app-network
 
   userservice:
     build:
       context: .
       dockerfile: UserService/Dockerfile
+      network: none
     image: userservice:dev
     container_name: userservice
     ports:
       - "5001:80"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     pull_policy: never
+    restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017
       - MongoSettings__DatabaseName=TaskManagementDB
+    networks:
+      - app-network
 
   taskservice:
     build:
       context: .
       dockerfile: TaskService/Dockerfile
+      network: none
     image: taskservice:dev
     container_name: taskservice
     ports:
       - "5002:80"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     pull_policy: never
+    restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017
       - MongoSettings__DatabaseName=TaskManagementDB
+    networks:
+      - app-network
 
   reportingservice:
     build:
       context: .
       dockerfile: ReportingService/Dockerfile
+      network: none
     image: reportingservice:dev
     container_name: reportingservice
     ports:
       - "5003:80"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     pull_policy: never
+    restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoSettings__ConnectionString=mongodb://mongodb:27017
       - MongoSettings__DatabaseName=TaskManagementDB
+    networks:
+      - app-network
 
 volumes:
   mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
