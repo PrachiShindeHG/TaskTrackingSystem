@@ -22,6 +22,8 @@ services:
       dockerfile: UserService/Dockerfile
       network: none
     image: userservice:dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     container_name: userservice
     ports:
       - "5001:80"
@@ -32,7 +34,7 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__ConnectionString=mongodb://host.docker.internal:27017
       - MongoSettings__DatabaseName=TaskManagementDB
     networks:
       - app-network
@@ -43,6 +45,8 @@ services:
       dockerfile: TaskService/Dockerfile
       network: none
     image: taskservice:dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     container_name: taskservice
     ports:
       - "5002:80"
@@ -53,7 +57,7 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__ConnectionString=mongodb://host.docker.internal:27017
       - MongoSettings__DatabaseName=TaskManagementDB
     networks:
       - app-network
@@ -64,6 +68,8 @@ services:
       dockerfile: ReportingService/Dockerfile
       network: none
     image: reportingservice:dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     container_name: reportingservice
     ports:
       - "5003:80"
@@ -74,7 +80,7 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - MongoSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoSettings__ConnectionString=mongodb://host.docker.internal:27017
       - MongoSettings__DatabaseName=TaskManagementDB
     networks:
       - app-network

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserService.Models; // This is IUserRepository
 using System.Threading.Tasks;
+using System.Security.Claims;
+using System.Text;
 
 namespace UserService.Controllers
 {
@@ -36,6 +38,7 @@ namespace UserService.Controllers
 
                 // Stub JWT-like token: "userId_role"
                 var token = $"{user.Id}_{user.Role}";
+
 
                 return Ok(new { Token = token });
             }
