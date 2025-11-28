@@ -93,6 +93,10 @@ namespace UserService.Controllers
                 var existing = await _repository.GetUserByIdAsync(id);
                 if (existing == null) return NotFound();
                 user.Id = id; // Ensure ID matches
+                if (!string.IsNullOrEmpty(user.Password))
+                {
+                    existing.Password = user.Password;
+                }
                 await _repository.UpdateUserAsync(id, user);
                 return NoContent();
             }

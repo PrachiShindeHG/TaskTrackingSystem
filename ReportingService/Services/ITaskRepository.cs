@@ -11,5 +11,10 @@ namespace ReportingService.Repositories
         Task<TaskItem?> GetByIdAsync(string id);
         Task<List<TaskItem>> FilterAsync(string? status, string? assigneeId, DateTime? from, DateTime? to);
         Task DeleteAsync(string id);
+
+        Task<List<TaskItem>> GetMyTasks(string id);
+
+        Task<string?> GetUsernameById(string userId);
+
     }
 }

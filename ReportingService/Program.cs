@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using ReportingService.Repositories;
+using Microsoft.AspNetCore.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,12 +32,24 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")   // Angular dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();   // Important if you send cookies/JWT in headers
+    });
+});
 
 var app = builder.Build();
 
+
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ReportingService v1"));
-
+app.UseHttpsRedirection();
+app.UseCors("AllowAngularDev");
 app.UseAuthorization();
 app.MapControllers();
 

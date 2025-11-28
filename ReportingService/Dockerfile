@@ -16,7 +16,7 @@ WORKDIR /src
 COPY ["ReportingService/ReportingService.csproj", "ReportingService/"]
 COPY ["TaskService/TaskService.csproj", "TaskService/"]
 
-# RESTORE USING LOCAL SDK â€” NO INTERNET PULL
+# RESTORE USING LOCAL SDK — NO INTERNET PULL
 RUN dotnet restore "./ReportingService/ReportingService.csproj"
 
 # COPY SOURCE CODE

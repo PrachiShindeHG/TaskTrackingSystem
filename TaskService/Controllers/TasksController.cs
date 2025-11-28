@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using TaskService.Models;
 
 namespace TaskService.Controllers
@@ -34,7 +37,27 @@ namespace TaskService.Controllers
         public async Task<IActionResult> Get([FromQuery] string? status, [FromQuery] string? assigneeId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
         {
             var tasks = await _repo.FilterAsync(status, assigneeId, from, to);
-            return Ok(tasks);
+            var result = new List<object>();
+
+            foreach (var task in tasks)
+            {
+                result.Add(new
+                {
+                    task.Id,
+                    task.Title,
+                    task.Description,
+                    task.Status,
+                    task.Priority,
+                    task.DueDate,
+                    task.CreatedAt,
+                    task.UpdatedAt,
+                    AssigneeId = task.AssigneeId,
+                    AssigneeUsername = await _repo.GetUsernameById(task.AssigneeId),
+                    CreatedById = task.CreatedById,
+                    CreatedByUsername = await _repo.GetUsernameById(task.CreatedById)
+                });
+            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -77,16 +100,29 @@ namespace TaskService.Controllers
 
             var existing = await _repo.GetByIdAsync(id);
             if (existing == null) return NotFound();
-
-            // Log status change
             if (existing.Status != updatedTask.Status)
             {
                 existing.ActivityLogs.Add(new ActivityLog
                 {
                     ChangedBy = userId,
-                    ChangeDescription = $"Status changed from {existing.Status} to {updatedTask.Status}"
+                    ChangeDescription = $"Status changed from {existing.Status} to {updatedTask.Status}",
+                    Timestamp = DateTime.UtcNow,
+                    FromStatus = existing.Status,
+                    ToStatus = updatedTask.Status
                 });
             }
+
+            //// Log status change if different
+            //if (!string.Equals(existing.Status, updatedTask.Status, StringComparison.OrdinalIgnoreCase))
+            //{
+            //    existing.StatusChangeLogs.Add(new ActivityLog
+            //    {
+            //        ChangedBy = userId,  
+            //        FromStatus = existing.Status,
+            //        ToStatus = updatedTask.Status,
+            //        Timestamp = DateTime.UtcNow
+            //    });
+            //}
 
             existing.Title = updatedTask.Title;
             existing.Description = updatedTask.Description;

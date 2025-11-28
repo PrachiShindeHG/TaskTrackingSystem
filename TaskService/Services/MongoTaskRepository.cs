@@ -1,17 +1,31 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using TaskService.Models;
 
 public class MongoTaskRepository : ITaskRepository
 {
     private readonly IMongoCollection<TaskItem> _tasks;
+    private readonly IMongoCollection<User> _users;
 
     public MongoTaskRepository(IOptions<MongoSettings> settings)
     {
         var client = new MongoClient(settings.Value.ConnectionString);
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _tasks = database.GetCollection<TaskItem>("Tasks");
+        _users = database.GetCollection<User>("Users");
+
     }
+
+    public async Task<string?> GetUsernameById(string? userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return null;
+        //var objectId = new ObjectId(userId);
+        var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        //var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        return user?.Username;
+    }
+
 
     public async Task<List<TaskItem>> GetAllAsync() =>
         await _tasks.Find(_ => true).ToListAsync();
