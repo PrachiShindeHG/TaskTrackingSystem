@@ -93,9 +93,9 @@ namespace UserService.Controllers
                 var existing = await _repository.GetUserByIdAsync(id);
                 if (existing == null) return NotFound();
                 user.Id = id; // Ensure ID matches
-                if (!string.IsNullOrEmpty(user.Password))
+                if (string.IsNullOrEmpty(user.Password))
                 {
-                    existing.Password = user.Password;
+                    user.Password = existing.Password;
                 }
                 await _repository.UpdateUserAsync(id, user);
                 return NoContent();
@@ -131,7 +131,9 @@ namespace UserService.Controllers
 
                 token = token["Bearer ".Length..].Trim(); // Remove "Bearer "
 
-                if (!token.EndsWith("_Admin"))
+                var tokenParts = token.Split('_');
+                var tokenRole = tokenParts.Length >= 2 ? tokenParts[^1] : string.Empty;
+                if (!tokenRole.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
                 {
                     _logger.LogWarning("Delete attempt by non-Admin. Token: {Token}", token);
                     return Forbid("Only Admin can delete users");

@@ -37,8 +37,7 @@ namespace UserService.Controllers
                     return Unauthorized("Invalid username or password");
 
                 // Stub JWT-like token: "userId_role"
-                var token = $"{user.Id}_{user.Role}";
-
+                var token = $"{user.Id}_{NormalizeRole(user.Role)}";
 
                 return Ok(new { Token = token });
             }
@@ -47,6 +46,16 @@ namespace UserService.Controllers
                 _logger.LogError(ex, "Error during login");
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        private static string NormalizeRole(string? role)
+        {
+            if (string.IsNullOrWhiteSpace(role))
+                return "User";
+
+            return role.Trim().Equals("admin", System.StringComparison.OrdinalIgnoreCase)
+                ? "Admin"
+                : role.Trim();
         }
     }
 

@@ -157,7 +157,7 @@ namespace ReportingService.Controllers
             {
                 TotalTasks = myTasks.Count(),
                 Open = myTasks.Count(t => t.Status == "Open"),
-                InProgress = myTasks.Count(t => t.Status == "In Progress"),
+                InProgress = myTasks.Count(t => t.Status == "InProgress"),
                 New = myTasks.Count(t => t.Status == "New"),
                 Blocked = myTasks.Count(t => t.Status == "Blocked"),
                 Completed = myTasks.Count(t => t.Status == "Completed")

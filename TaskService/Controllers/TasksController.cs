@@ -25,6 +25,30 @@ namespace TaskService.Controllers
             return string.IsNullOrEmpty(token) ? null : token.Split('_')[0];
         }
 
+        private async Task<string?> GetUsernameFromTokenAsync()
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrWhiteSpace(authHeader)) return null;
+
+            var token = authHeader.Replace("Bearer ", "").Trim();
+            if (string.IsNullOrWhiteSpace(token)) return null;
+
+            var parts = token.Split('_', 2);
+            var userId = parts.Length > 0 ? parts[0] : null;
+            if (string.IsNullOrWhiteSpace(userId)) return null;
+
+            try
+            {
+                var username = await _repo.GetUsernameById(userId);
+                return string.IsNullOrWhiteSpace(username) ? userId : username;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to resolve username for token userId={UserId}", userId);
+                return userId;
+            }
+        }
+
         /// <summary>
         /// Method to get task using filters
         /// </summary>
@@ -36,12 +60,28 @@ namespace TaskService.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] string? status, [FromQuery] string? assigneeId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
         {
+            // Use repository FilterAsync so query parameters are applied.
+            // When all parameters are null/empty the repository returns all tasks.
             var tasks = await _repo.FilterAsync(status, assigneeId, from, to);
-            var result = new List<object>();
 
-            foreach (var task in tasks)
+            // Batch username resolution to avoid N+1 queries.
+            var userIds = tasks
+                .SelectMany(t => new[] { t.AssigneeId, t.CreatedById })
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var usernameTasks = userIds.ToDictionary(uid => uid, uid => _repo.GetUsernameById(uid));
+            await Task.WhenAll(usernameTasks.Values);
+
+            var usernameMap = usernameTasks.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Result ?? kvp.Key);
+
+            var result = tasks.Select(task =>
             {
-                result.Add(new
+                usernameMap.TryGetValue(task.AssigneeId ?? string.Empty, out var assigneeUsername);
+                usernameMap.TryGetValue(task.CreatedById ?? string.Empty, out var createdByUsername);
+
+                return new
                 {
                     task.Id,
                     task.Title,
@@ -52,11 +92,12 @@ namespace TaskService.Controllers
                     task.CreatedAt,
                     task.UpdatedAt,
                     AssigneeId = task.AssigneeId,
-                    AssigneeUsername = await _repo.GetUsernameById(task.AssigneeId),
+                    AssigneeUsername = string.IsNullOrWhiteSpace(assigneeUsername) ? null : assigneeUsername,
                     CreatedById = task.CreatedById,
-                    CreatedByUsername = await _repo.GetUsernameById(task.CreatedById)
-                });
-            }
+                    CreatedByUsername = string.IsNullOrWhiteSpace(createdByUsername) ? null : createdByUsername
+                };
+            }).ToList();
+
             return Ok(result);
         }
 
@@ -95,7 +136,7 @@ namespace TaskService.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] TaskItem updatedTask)
         {
-            var userId = GetUserIdFromToken();
+            var userId = await GetUsernameFromTokenAsync();
             if (userId == null) return Unauthorized("Token required");
 
             var existing = await _repo.GetByIdAsync(id);
@@ -129,6 +170,7 @@ namespace TaskService.Controllers
             existing.Priority = updatedTask.Priority;
             existing.Status = updatedTask.Status;
             existing.AssigneeId = updatedTask.AssigneeId;
+            existing.AssigneeName = updatedTask.AssigneeName;
             existing.DueDate = updatedTask.DueDate;
             existing.UpdatedAt = DateTime.UtcNow;
 
@@ -154,8 +196,10 @@ namespace TaskService.Controllers
                 if (existingTask == null)
                     return NotFound($"Task with id {id} not found");
 
-                var role = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Split('_')[1];
-                if (role != "Admin")
+                var authToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim();
+                var tokenParts = authToken.Split('_');
+                var role = tokenParts.Length >= 2 ? tokenParts[^1] : string.Empty;
+                if (!role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
                 {
                     return Forbid("Only Admin can delete the tasks");
                 }
